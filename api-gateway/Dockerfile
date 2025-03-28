@@ -28,8 +28,8 @@ RUN composer install --no-dev --optimize-autoloader
 RUN cp .env.example .env && php artisan key:generate
 RUN chmod -R 777 storage bootstrap/cache
 
-# Открываем порт 8000
-EXPOSE 8000
+# Открываем порт 80
+EXPOSE 80
 
 # Запуск сервера Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]

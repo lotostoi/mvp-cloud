@@ -21,21 +21,18 @@ services:
     networks:
       - backend
     ports:
-      - "1020:8000"
+      - "1020:80"
     volumes:
       - ./api-gateway:/var/www  
       # - /var/www/vendor
- #   depends_on:
- #     - auth-service
- #    - request-service
- #     - other_api_service
+
 
   auth_service:
     build:
       context: ./auth-service
     container_name: auth-service
     ports:
-      - "1025:8000"
+      - "1025:80"
     networks:
       - backend
     volumes:
@@ -44,6 +41,7 @@ services:
     environment:
       - DB_HOST=db_auth_service
       - DB_PORT=3306
+      
   frontend: 
     build:
       context: ./frontend
