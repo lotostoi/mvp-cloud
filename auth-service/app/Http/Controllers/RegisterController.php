@@ -21,10 +21,11 @@ class RegisterController extends Controller
         //     'password' => Hash::make($request->password),
         // ]);
 
-        $response = Http::get('http://127.0.0.1/api-auth/test');
+   
+
+        $response = Http::get('http://nginx/api-auth/test');
 
         return response()->json($response->json());
-
 
         $response = Http::post('http://172.19.0.4/oauth/token', [
             'grant_type'    => 'password',
