@@ -25,7 +25,7 @@ import {
   type Errors,
 } from "../model/registerSchema";
 import { validateForm, isValidated } from "../lib/validation";
-const { register } = useRegisterService();
+
 
 const errors = ref<Errors>({ email: "", password: "" });
 
@@ -47,7 +47,7 @@ const handleSubmit = async (): Promise<void> => {
   startValidation.value = true;
   if (_isValidated.value) {
     isLoading.value = true;
-    await register(form.value, errors);
+    await useRegisterService(form.value, errors);
     isLoading.value = false;
   }
 };
