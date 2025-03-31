@@ -22,7 +22,8 @@ class RegisterController extends Controller
                 'Content-Type' => 'application/json'
             ])->post(config('services.auth.url') . '/api-auth/register', [
                 'email' => $request->email,
-                'password' => $request->password
+                'password' => $request->password,
+                'passport' => $request->passport
             ])->throw();
 
             return response()->json($response->json(), $response->status());

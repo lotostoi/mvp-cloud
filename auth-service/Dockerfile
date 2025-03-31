@@ -1,35 +1,49 @@
 FROM php:8.2-fpm
+# Базовый образ с PHP 8.2 и FastCGI Process Manager для обработки PHP запросов
 
-# Установка необходимых зависимостей
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
     zip \
     unzip \
     curl \
     git \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql
+    bash
+# Обновление пакетного менеджера и установка базовых утилит:
+# - zip/unzip для работы с архивами
+# - curl для выполнения HTTP запросов
+# - git для работы с системой контроля версий
+# - bash для работы с командной оболочкой
 
-# Установка Composer
+RUN docker-php-ext-install pdo pdo_mysql
+# Установка расширений PHP для работы с MySQL:
+# - pdo: PHP Data Objects - абстрактный слой доступа к БД
+# - pdo_mysql: драйвер MySQL для PDO
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Копирование исполняемого файла Composer из официального образа
+# Composer используется для управления зависимостями PHP
 
-# Создание рабочей директории
 WORKDIR /var/www
+# Установка рабочей директории для приложения
 
-# Копирование файлов приложения
 COPY . .
+# Копирование всех файлов проекта в контейнер
 
-# Установка зависимостей Laravel
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --optimize-autoloader
+# Установка зависимостей проекта через Composer
+# --optimize-autoloader генерирует оптимизированную карту классов
 
-# Копирование конфигурации и установка прав
 RUN cp .env.example .env && php artisan key:generate
+# Создание файла окружения из примера и генерация ключа приложения
+# Ключ используется для шифрования данных
+
 RUN chmod -R 777 storage bootstrap/cache
+# Установка прав на запись для директорий хранения данных
+# Необходимо для работы кэша, логов и сессий
 
-# Открываем порт 80
-EXPOSE 80
+EXPOSE 9000
+# Объявление порта, который будет использоваться для PHP-FPM
 
-# Запуск сервера Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+CMD ["php-fpm"]
+# Запуск PHP-FPM в режиме демона:
+# -y указывает путь к конфигурационному файлу
+# -R запускает процесс от root пользователя

@@ -2,35 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\OAuth\PassportsEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
+use App\Repository\OAuthClient\OAuthClientRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 class RegisterController extends Controller
 {
-    public function __construct() {}
+    public function __construct(
+        private readonly OAuthClientRepository $oAuthClientRepository
+    ) {}
 
     public function __invoke(RegisterRequest $request) {
 
-        // $user = User::create([
-        //     'name' => $request->name ?? 'test',
-        //     'email' => $request->email,
-        //     'password' => Hash::make($request->password),
-        // ]);
+        $user = User::create([
+            'name' => $request->name ?? 'test',
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
-   
+        $passport = PassportsEnum::from($request->passport);
 
-        $response = Http::get('http://nginx/api-auth/test');
+        $oAuthClient = $this->oAuthClientRepository->findClientByPassport($passport);
 
-        return response()->json($response->json());
-
-        $response = Http::post('http://172.19.0.4/oauth/token', [
+        $response = Http::post('http://nginx/oauth/token', [
             'grant_type'    => 'password',
-            'client_id'     => 1,
-            'client_secret' => 'uYqx4HDqUTUMV7je6TNdMbsprhKrM1aFOltNiWld',
+            'client_id'     => $oAuthClient->id,
+            'client_secret' => $oAuthClient->secret,
             'username'      => $request->email,
             'password'      => $request->password,
             'scope'         => '',
@@ -43,7 +43,7 @@ class RegisterController extends Controller
         $tokens = $response->json();
 
         return response()->json([
-            //'user'          => $user,
+            'user'          => $user,
             'access_token'  => $tokens['access_token'],
             'refresh_token' => $tokens['refresh_token'],
             'token_type'    => $tokens['token_type'],

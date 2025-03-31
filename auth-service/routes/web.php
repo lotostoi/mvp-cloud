@@ -10,5 +10,5 @@ Route::get('api-auth/test', function () {
 
     Log::info('test');
 
-    return 'test';
+    return response()->json(['message' => 'test']);
 });
