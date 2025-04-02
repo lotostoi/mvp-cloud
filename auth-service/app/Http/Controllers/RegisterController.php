@@ -9,13 +9,15 @@ use App\Models\User;
 use App\Repository\OAuthClient\OAuthClientRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+
 class RegisterController extends Controller
 {
     public function __construct(
         private readonly OAuthClientRepository $oAuthClientRepository
     ) {}
 
-    public function __invoke(RegisterRequest $request) {
+    public function __invoke(RegisterRequest $request)
+    {
 
         $user = User::create([
             'name' => $request->name ?? 'test',
@@ -45,9 +47,9 @@ class RegisterController extends Controller
         return response()->json([
             'user'          => $user,
             'access_token'  => $tokens['access_token'],
-            'refresh_token' => $tokens['refresh_token'],
             'token_type'    => $tokens['token_type'],
             'expires_in'    => $tokens['expires_in']
-        ], 201);
+        ], 201)
+            ->cookie('refresh_token', $tokens['refresh_token'], 60 * 24 * 30, '/', "localhost", false, true, false, 'Lax');
     }
 }

@@ -14,8 +14,6 @@ class RegisterController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-
-
         try {
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
@@ -26,7 +24,19 @@ class RegisterController extends Controller
                 'passport' => $request->passport
             ])->throw();
 
-            return response()->json($response->json(), $response->status());
+            // Получаем куки из ответа auth-service
+            $cookies = $response->headers()['Set-Cookie'] ?? [];
+
+            // Создаем ответ
+            $jsonResponse = response()->json($response->json(), $response->status());
+
+            // Добавляем все куки из auth-service в ответ
+            foreach ($cookies as $cookie) {
+                $jsonResponse->withHeaders(['Set-Cookie' => $cookie]);
+            }
+
+            return $jsonResponse;
+
         } catch (\Illuminate\Http\Client\RequestException $e) {
             $errorResponse = $e->response;
 

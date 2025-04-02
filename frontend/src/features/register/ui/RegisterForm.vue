@@ -1,5 +1,8 @@
 <template>
   <v-form :submit="handleSubmit" class="form">
+    <v-alert v-if="errors.serverError" type="error">
+      Ошибка ответа сервера! Попробуйте позже.
+    </v-alert>
     <v-text-field
       v-model="form.email"
       label="E-mail"
@@ -15,19 +18,20 @@
     <v-btn type="submit" color="primary" :loading="isLoading"
       >Регистрация</v-btn
     >
+    <v-btn color="warning" @click="test"
+      >test</v-btn
+    >
   </v-form>
 </template>
   
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRegisterService } from "../services/registerService";
-import {
-  type Errors,
-} from "../model/registerSchema";
+import { type Errors } from "../model/registerSchema";
 import { validateForm, isValidated } from "../lib/validation";
+import router from "@/router";
 
-
-const errors = ref<Errors>({ email: "", password: "" });
+const errors = ref<Errors>({ email: "", password: "", serverError: false });
 
 const form = ref<{ email: string; password: string; passport: string }>({
   email: "",
@@ -47,9 +51,13 @@ const handleSubmit = async (): Promise<void> => {
   startValidation.value = true;
   if (_isValidated.value) {
     isLoading.value = true;
-    await useRegisterService(form.value, errors);
+    await useRegisterService().register(form.value, errors);
     isLoading.value = false;
   }
+};
+
+const test = () => {
+  router.push('/main');
 };
 </script>
 

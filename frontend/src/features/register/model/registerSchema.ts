@@ -5,7 +5,8 @@ import { watch, computed, type Ref } from "vue";
 export type Errors = {
   email: string;
   password: string;
-  [key: string]: string | undefined;
+  serverError: boolean | undefined;
+  [key: string]: string | boolean | undefined;
 };
 
 export const registerSchema = yup.object({

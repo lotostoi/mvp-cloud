@@ -37,7 +37,10 @@ export const validateForm = (
 
 export const isValidated = (errors: Ref<Errors>) =>
   computed(() => {
-    return Object.values(errors.value).every((error) => error === "");
+    const filteredErrors = {...errors.value};
+    delete filteredErrors.serverError;
+
+    return Object.values(filteredErrors).every((error) => error === "");
   });
 
 export const handleServerErrors = (err: unknown, errors: Ref<Errors>) => {
@@ -51,6 +54,12 @@ export const handleServerErrors = (err: unknown, errors: Ref<Errors>) => {
           errors.value[key] = value;
         }
       });
+    }
+    if (err.response?.data.status === 500) {
+      errors.value.serverError = true;
+      setTimeout(() => {
+        errors.value.serverError = false;
+      }, 3000);
     }
   }
 };
